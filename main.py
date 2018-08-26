@@ -1,3 +1,4 @@
+import argparse
 import os
 
 import numpy as np
@@ -6,15 +7,15 @@ import scipy.misc
 import tensorflow as tf
 
 IMAGE_W = 800
-IMAGE_H = 600
+IMAGE_H = 800
 CONTENT_IMG = './images/Taipei101.jpg'
 STYLE_IMG = './images/StarryNight.jpg'
 OUTOUT_DIR = './results'
 OUTPUT_IMG = 'results.png'
-VGG_MODEL = 'imagenet-vgg-verydeep-19.mat'
+VGG_MODEL = '../imagenet-vgg-verydeep-19.mat'
 INI_NOISE_RATIO = 0.7
 STYLE_STRENGTH = 500
-ITERATION = 5000
+ITERATION = 1000
 
 CONTENT_LAYERS = [('conv4_2', 1.)]
 STYLE_LAYERS = [('conv1_1', 1.), ('conv2_1', 1.),
@@ -129,7 +130,7 @@ def write_image(path, image):
     scipy.misc.imsave(path, image)
 
 
-def main():
+def stylize():
     net = build_vgg19(VGG_MODEL)
     sess = tf.Session()
     sess.run(tf.initialize_all_variables())
@@ -161,11 +162,68 @@ def main():
         sess.run(train)
         if i % 100 == 0:
             result_img = sess.run(net['input'])
-            print sess.run(cost_total)
+            print(sess.run(cost_total))
             write_image(os.path.join(OUTOUT_DIR, '%s.png' %
                                      (str(i).zfill(4))), result_img)
 
     write_image(os.path.join(OUTOUT_DIR, OUTPUT_IMG), result_img)
+
+
+def parse_parameters():
+
+    def image_files(input):
+        files_adresses = input.split(',')
+        output = []
+        legal_file_types = ('.jpg', '.png')
+
+        for file_address in files_adresses:
+            if os.path.isdir(file_address):
+                for root, dirs, files in os.walk(file_address):
+                    for file_name in files:
+                        output.append(os.path.join(root, file_name))
+            if os.path.isfile(file_address):
+                output.append(file_address)
+
+        output = [file_name for file_name in output if file_name.endswith(legal_file_types)]
+        if len(output) == 0:
+            raise argparse.ArgumentTypeError('Illegal image files parameter')
+
+        return output
+
+    parser = argparse.ArgumentParser(
+        description='Stylize and cross reference style and content images',
+        formatter_class=argparse.ArgumentDefaultsHelpFormatter)
+    parser.add_argument('content_images', type=image_files,
+                        help='comma seperated content images to apply the style to')
+    parser.add_argument('style_images', type=image_files,
+                        help='comma seperated style images to derive the style from')
+    parser.add_argument('--output-dir', dest='output_directory', type=str,
+                        help='output directory', default='./results')
+    parser.add_argument('--model', dest='model_path', type=str,
+                        help='relative path to model file', default='./imagenet-vgg-verydeep-19.mat')
+    parser.add_argument('--iterations', dest='iterations', type=int,
+                        help='number of iterations', default=1000)
+
+    args = parser.parse_args()
+    return args
+
+
+def main():
+    def file_name(path):
+        return os.path.splitext(os.path.basename(path))[0]
+
+    args = parse_parameters()
+    OUTOUT_DIR = args.output_directory
+    VGG_MODEL = args.model_path
+    ITERATION = args.iterations
+
+    for style in args.style_images:
+        for content in args.content_images:
+            CONTENT_IMG = content
+            STYLE_IMG = style
+            OUTPUT_IMG = "{style_name}:{content_name}.png".format(
+                style_name=file_name(style), content_name=file_name(content))
+            stylize()
 
 
 if __name__ == '__main__':
