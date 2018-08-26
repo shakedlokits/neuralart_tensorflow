@@ -163,8 +163,6 @@ def stylize():
         if i % 100 == 0:
             result_img = sess.run(net['input'])
             print(sess.run(cost_total))
-            write_image(os.path.join(OUTOUT_DIR, '%s.png' %
-                                     (str(i).zfill(4))), result_img)
 
     write_image(os.path.join(OUTOUT_DIR, OUTPUT_IMG), result_img)
 
