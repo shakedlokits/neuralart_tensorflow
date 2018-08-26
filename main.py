@@ -116,7 +116,7 @@ def build_style_loss(a, x):
 
 
 def read_image(path):
-    image = scipy.misc.imread(path)
+    image = scipy.misc.imread(path, mode='RGB')
     image = scipy.misc.imresize(image, (IMAGE_H, IMAGE_W))
     image = image[np.newaxis, :, :, :]
     image = image - MEAN_VALUES
@@ -174,7 +174,7 @@ def parse_parameters():
     def image_files(input):
         files_adresses = input.split(',')
         output = []
-        legal_file_types = ('.jpg', '.png')
+        legal_file_types = ('.jpg', '.png', '.PNG')
 
         for file_address in files_adresses:
             if os.path.isdir(file_address):
