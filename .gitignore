@@ -1,2 +1,5 @@
 *.mat
 *.png
+results/
+styles/
+contents/
