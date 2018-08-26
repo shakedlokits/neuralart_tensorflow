@@ -209,6 +209,13 @@ def parse_parameters():
 
 
 def main():
+    global CONTENT_IMG
+    global STYLE_IMG
+    global OUTOUT_DIR
+    global OUTPUT_IMG
+    global VGG_MODEL
+    global ITERATION
+
     def file_name(path):
         return os.path.splitext(os.path.basename(path))[0]
 
