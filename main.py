@@ -226,7 +226,7 @@ def main():
         for content in args.content_images:
             CONTENT_IMG = content
             STYLE_IMG = style
-            OUTPUT_IMG = "{style_name}:{content_name}.png".format(
+            OUTPUT_IMG = "{style_name}+{content_name}.png".format(
                 style_name=file_name(style), content_name=file_name(content))
             stylize()
 
